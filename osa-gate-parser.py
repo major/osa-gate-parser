@@ -96,18 +96,20 @@ class GateParser:
 
     def display_output(self):
         """Pretty prints the stats dict."""
-        # pprint(self.stats)
         for play, tasks in self.stats.items():
 
             # Print a header for the play
             header = "PLAY: {} ".format(play).ljust(80, '-')
             print(header)
 
+            # Sort the tasks and print them.
             sorted_tasks = sorted(tasks.items(), key=self.elapsed_sort,
                                   reverse=True)
             for task, timings in sorted_tasks[:20]:
                 task = "{} | {}".format(
-                    str(timings.get('elapsed', None)).rjust(9),
+                    str(timings.get(
+                        'elapsed',
+                        datetime.timedelta(0))).rjust(9),
                     task)
                 print(task)
 
