@@ -18,6 +18,7 @@
 # Usage ./osa-gate-parser.py <GATE_CONSOLE_URL>
 #
 """Parse OSA gate jobs and report on timings."""
+import argparse
 import operator
 import re
 import sys
@@ -38,10 +39,11 @@ def pretty_time(seconds):
 class GateParser:
     """Class for parsing timing data from OpenStack-Ansible job runs."""
 
-    def __init__(self, url):
+    def __init__(self, url, remove_play):
         """Constructor function."""
         self.current_play = None
         self.previous_task = None
+        self.remove_play = remove_play
         self.stats = {}
 
         self.r = requests.get(url, stream=True).iter_lines()
@@ -79,6 +81,9 @@ class GateParser:
         """Handle the TASK lines in the output."""
         match = re.search(r"(TASK|RUNNING HANDLER) \[(.*)\] \**", line)
         task_name = match.groups()[1]
+
+        if self.remove_play and ':' in task_name:
+            task_name = task_name.split(' : ')[1]
 
         timestamp = parse(timestamp)
 
@@ -125,5 +130,19 @@ class GateParser:
             print("{} - {}".format(pretty_time(total_time), task_name))
 
 
-x = GateParser(sys.argv[1])
+parser = argparse.ArgumentParser(description='Parse OSA gate logs.')
+parser.add_argument(
+    '--remove-play', '-r',
+    action='store_true',
+    help="Remove play output"
+)
+parser.add_argument(
+    'url',
+    type=str,
+    nargs=1,
+    help="URL to console output"
+)
+args = parser.parse_args()
+
+x = GateParser(args.url[0], remove_play=args.remove_play)
 x.display_output()
