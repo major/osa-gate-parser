@@ -39,14 +39,15 @@ def pretty_time(seconds):
 class GateParser:
     """Class for parsing timing data from OpenStack-Ansible job runs."""
 
-    def __init__(self, url, remove_play):
+    def __init__(self, args):
         """Constructor function."""
         self.current_play = None
         self.previous_task = None
-        self.remove_play = remove_play
+        self.remove_play = args.remove_play
+        self.results = args.number
         self.stats = {}
 
-        self.r = requests.get(url, stream=True).iter_lines()
+        self.r = requests.get(args.url[0], stream=True).iter_lines()
         for line in self.r:
             self.process_line(line)
 
@@ -126,7 +127,7 @@ class GateParser:
             self.stats.items(),
             key=operator.itemgetter(1),
             reverse=True)
-        for task_name, total_time in sorted_stats[:50]:
+        for task_name, total_time in sorted_stats[:self.results]:
             print("{} - {}".format(pretty_time(total_time), task_name))
 
 
@@ -137,6 +138,12 @@ parser.add_argument(
     help="Remove play output"
 )
 parser.add_argument(
+    '--number', '-n',
+    type=int,
+    help="Number of results to display",
+    default=25
+)
+parser.add_argument(
     'url',
     type=str,
     nargs=1,
@@ -144,5 +151,5 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-x = GateParser(args.url[0], remove_play=args.remove_play)
+x = GateParser(args)
 x.display_output()
