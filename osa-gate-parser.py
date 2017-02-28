@@ -26,6 +26,15 @@ from dateutil.parser import parse
 import requests
 
 
+def pretty_time(seconds):
+    """Convert seconds into pretty hours/minutes/seconds."""
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    pretty_time = "%02d:%02d:%02d" % (h, m, s)
+
+    return pretty_time
+
+
 class GateParser:
     """Class for parsing timing data from OpenStack-Ansible job runs."""
 
@@ -105,14 +114,15 @@ class GateParser:
 
     def display_output(self):
         """Pretty prints the stats dict."""
+        all_time = pretty_time(sum(self.stats.values()))
+        print("---------- TOTAL TIME {} ".format(all_time).ljust(80, '-'))
+
         sorted_stats = sorted(
             self.stats.items(),
             key=operator.itemgetter(1),
             reverse=True)
         for task_name, total_time in sorted_stats[:50]:
-            minutes, seconds = divmod(total_time, 60)
-            pretty_time = "%02d:%02d" % (minutes, seconds)
-            print("{} - {}".format(pretty_time, task_name))
+            print("{} - {}".format(pretty_time(total_time), task_name))
 
 
 x = GateParser(sys.argv[1])
