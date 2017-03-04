@@ -61,7 +61,7 @@ class GateParser:
             return False
 
         # Handle each task line
-        if line.startswith("TASK") or line.startswith('RUNNING HANDLER'):
+        if line.startswith("TASK ") or line.startswith('RUNNING HANDLER '):
             self.handle_task(timestamp, line)
             return True
 
