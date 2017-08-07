@@ -44,6 +44,7 @@ class GateParser:
         self.current_play = None
         self.previous_task = None
         self.remove_play = args.remove_play
+        self.roles_only = args.roles_only
         self.results = args.number
         self.stats = {}
 
@@ -85,6 +86,12 @@ class GateParser:
 
         if self.remove_play and ':' in task_name:
             task_name = task_name.split(' : ')[1]
+
+        if self.roles_only:
+            if ':' in task_name:
+                task_name = task_name.split(' : ')[0]
+            else:
+                task_name = "Base playbook (not from role)"
 
         timestamp = parse(timestamp)
 
@@ -136,6 +143,11 @@ parser.add_argument(
     '--remove-play', '-r',
     action='store_true',
     help="Remove play output"
+)
+parser.add_argument(
+    '--roles-only', '-o',
+    action='store_true',
+    help="Show only roles"
 )
 parser.add_argument(
     '--number', '-n',
