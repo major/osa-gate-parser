@@ -65,9 +65,9 @@ class GateParser:
             self.handle_task(timestamp, line)
             return True
 
-        # When we get to the PLAY RECAP line, we need to write the final
-        # time to the last task we saw and flush the name of the previous task.
-        if line.startswith("PLAY RECAP"):
+        # If we reached a PLAY RECAP line, or if the job times out, we should
+        # note the timestamp and add it to the previous task.
+        if line.startswith("PLAY RECAP") or '[Zuul] Job timed out' in line:
 
             # Sometimes we get two play recaps in a row without tasks between
             # them.
