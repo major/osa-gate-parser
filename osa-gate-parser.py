@@ -84,8 +84,9 @@ class GateParser:
         match = re.search(r"(TASK|RUNNING HANDLER) \[(.*)\] \**", line)
         task_name = match.groups()[1]
 
-        if self.remove_play and ':' in task_name:
-            task_name = task_name.split(' : ')[1]
+        if self.remove_play:
+            if ':' in task_name:
+                task_name = task_name.split(' : ')[1]
 
         if self.roles_only:
             if ':' in task_name:
